@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+		<title>ESO Furnishings Planner</title>
+		<link rel="stylesheet" type="text/css" href="furnishings.css">
+		<script type="text/javascript">
+		//$(function() {
+			/*
+
+			var translation = {};
+
+			$.getJSON('furnishings.json', function(data) {
+				translation = data
+				console.log(translation)
+			});
+			*/
+
+
+			/*
+			Object.keys(translation).forEach(function(k){
+				console.log(data[k])
+			});
+			*/
+
+
+		//});
+
+		</script>
+		<script type="text/javascript" src="fakeFurnishingsJSON.js"></script>
+		<script type="text/javascript">
+
+
+			var furnishings = {}
+			/*
+
+			<tr>
+				<td>Test</td>
+				<td><input type="number"></td>
+				<td><button>-</button></td>
+			</tr>
+
+			<div class="row">
+				<div class="cell">Luke Peters</div>
+				<div class="cell">25</div>
+				<div class="cell">-</div>
+			</div>
+
+			*/
+						
+
+
+			function addHandler() {
+				let name = this.text
+				if (name in furnishings) {
+					return
+				}
+				/*
+				let template = `<tr name="${name}"><td>${name}</td><td><input type="number" value=1 onChange='changeHandler(this)'></td><td><button onclick='removeHandler(this)'>-</button></td></tr>`
+				document.getElementById("furnishingBody").insertAdjacentHTML('beforeend',template)
+				*/
+				let template = `<div class="row" name="${name}"><div class="cell">${name}</div><div class="cell"><input type="number" value=1 onChange='changeHandler(this)'></div><div class="cell"><button onclick='removeHandler(this)'>-</button></div></div>`
+				document.getElementById("furnishingsTable").insertAdjacentHTML('beforeend',template)
+				toggleDropdown()
+				furnishings[name] = 1
+				/*
+				console.log(name)
+				console.log(translation[name])
+				console.log()
+				*/
+				//console.log(furnishings)
+				updateMats()
+			}
+
+			function removeHandler(ele) {
+				let element = ele.parentElement.parentElement;
+				delete furnishings[element.firstChild.innerText];
+				element.remove();
+				//console.log(furnishings);
+				updateMats()
+			}
+
+			function changeHandler(ele) {
+				let name = ele.parentElement.parentElement.firstChild.innerText;
+				let amount = ele.value;
+				if (amount == '') {
+					amount = 0
+				} else {
+					amount = Number(amount)
+				}
+				furnishings[name] = amount;
+				//console.log(furnishings);
+				updateMats()
+			}
+
+
+			/*
+			<div class="row">
+				<div class="cell" style="width: 70%">Name</div>
+				<div class="cell">Amount</div>
+				<div class="cell">Price</div>
+			</div>
+			*/
+
+			function updateMats() {
+				let materials = {};
+				Object.keys(furnishings).forEach(function(name) {
+					let count = furnishings[name];
+					//console.log(`${name} - ${count}`);
+					let current = translation[name];
+					//console.log(current)
+					Object.keys(translation[name]).forEach(function(lmat) {
+						if (lmat in materials) {
+							materials[lmat] += count*current[lmat]
+						} else {
+							materials[lmat] = count*current[lmat]
+						}
+					});
+				});
+
+
+				let materialString = '<div class="row header"><div class="cell" style="width: 70%">Name</div><div class="cell">Amount</div><div class="cell">Price</div></div>'
+				Object.keys(materials).forEach(function(name) {
+					materialString += `<div class="row"><div class="cell">${name}</div><div class="cell">${materials[name]}</div><div class="cell"><input type="number" value=0></div></div>`
+				});
+				/*
+				let materialString = ''
+				Object.keys(materials).forEach(function(name) {
+					materialString += `<li>${materials[name]}x ${name}</li>`
+				});
+				document.getElementById('materialsList').innerHTML = materialString
+				*/
+				document.getElementById('materialsOut').innerHTML = materialString
+
+				//console.log(materials)
+				
+			}
+
+			$(function() {
+				//console.log(translation)
+				let dropdown = document.getElementById('dropdownScroll')
+				Object.keys(translation).forEach(function(k) {
+					let a = document.createElement('a')
+					a.className = "dropdownHover";
+					a.appendChild(document.createTextNode(k))
+					a.onclick = addHandler
+					dropdown.appendChild(a)
+				});
+			});
+
+
+			//from codevoila
+			function exportToJsonFile(jsonData) {
+				let dataStr = JSON.stringify(jsonData);
+				let dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+
+				let exportFileDefaultName = 'data.json';
+
+				let linkElement = document.createElement('a');
+				linkElement.setAttribute('href', dataUri);
+				linkElement.setAttribute('download', exportFileDefaultName);
+				linkElement.click();
+			}
+
+			//from stackoverflow
+			function importFromJSON() {
+				let files = document.getElementById('selectFiles').files;
+				if (files.length <= 0) {
+					return false;
+				}
+				let fr = new FileReader();
+				fr.onload = function(e) { 
+					console.log(e);
+					furnishings = JSON.parse(e.target.result);
+					importHandler()
+				}
+				fr.readAsText(files.item(0));
+			};
+
+			function importHandler() {
+				let innerHTML = '<div class="row header blue"><div class="cell" style="width: 70%">Name</div><div class="cell">Amount</div><div class="cell">Remove</div></div>'
+				Object.keys(furnishings).forEach(function(name) {
+					//innerHTML += `<tr name="${name}"><td>${name}</td><td><input type="number" value=${furnishings[name]} onChange='changeHandler(this)'></td><td><button onclick='removeHandler(this)'>-</button></td></tr>`
+					innerHTML += `<div class="row" name="${name}"><div class="cell">${name}</div><div class="cell"><input type="number" value=${furnishings[name]} onChange='changeHandler(this)'></div><div class="cell"><button onclick='removeHandler(this)'>-</button></div></div>`
+				})
+				document.getElementById("furnishingsTable").innerHTML = innerHTML
+				updateMats()
+			}
+
+
+		</script>
+
+	</head>
+	<body>
+
+
+		<!--
+			<table id="furnishingList">
+				<thead id="furnishingHead">
+					<th id="furnishingHeadName">Name</th>
+					<th>Amount</th>
+					<th>Remove</th>
+				</thead>
+				<tbody id="furnishingBody"></tbody>
+			</table>
+		-->
+		<div class="wrapper">
+			<div class="table" id="furnishingsTable">
+				<div class="row header blue">
+					<div class="cell" style="width: 70%">Name</div>
+					<div class="cell">Amount</div>
+					<div class="cell">Remove</div>
+				</div>
+			</div>
+			<div class="table">
+				<div class="row header green" id='furnishingsAdd'>
+					<div class="cell" onclick="toggleDropdown()">+</div>
+				</div>
+				<div id="myDropdown" class="dropdown-content">
+					<input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
+					<div id="dropdownScroll">
+						
+					</div>
+				</div>
+			</div>
+
+		</div>
+		
+
+
+
+
+
+		<!-- Dropdown Code from W3 Schools -->
+<!--
+		<div id="materials">
+			<p>The materials required to make all the specified items are:</p>
+			<ul id="materialsList"></ul>
+		</div>
+-->
+		<div class="wrapper">
+			<div class="table" style="margin: 0px">
+				<div class="row header blue">
+					<div class="cell">The materials required to make all the specified items are:</div>
+				</div>
+			</div>
+			<div class="table" id="materialsOut">
+				<div class="row header">
+					<div class="cell" style="width: 70%">Name</div>
+					<div class="cell">Amount</div>
+					<div class="cell">Price</div>
+				</div>
+			</div>
+		</div>
+
+
+
+
+
+
+
+
+
+
+		<table id="furnishingIO">
+			<tbody>
+				<tr><td><button id="export" onclick="exportToJsonFile(furnishings)">Export</button></td></tr>
+				<tr><td><input type="file" id="selectFiles" value="Import" /></td></tr>
+				<tr><td><button id="import" onclick="importFromJSON()">Import</button></td></tr>
+			</tbody>
+		</div>
+
+
+		<script>
+			/* When the user clicks on the button,
+			toggle between hiding and showing the dropdown content */
+			function toggleDropdown() {
+				document.getElementById("myDropdown").classList.toggle("show");
+			}
+
+			function filterFunction() {
+				var input, filter, ul, li, a, i;
+				input = document.getElementById("myInput");
+				filter = input.value.toUpperCase();
+				div = document.getElementById("myDropdown");
+				a = div.getElementsByTagName("a");
+				for (i = 0; i < a.length; i++) {
+					txtValue = a[i].textContent || a[i].innerText;
+					if (txtValue.toUpperCase().indexOf(filter) > -1) {
+						a[i].style.display = "";
+					} else {
+						a[i].style.display = "none";
+					}
+				}
+			}
+		</script>
+
+	</body>
+</html>

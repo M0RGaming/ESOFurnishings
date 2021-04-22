@@ -22,6 +22,7 @@
   text-align: center;
   border: none;
   border-bottom: 1px solid #ddd;
+  width: 100%;
 }
 
 #myInput:focus {outline: 3px solid #ddd;}
@@ -54,10 +55,18 @@
 .show {display: grid;}
 
 
+#pricesIO {
+  text-align: center;
+  background-color: #FF7777;
+  margin: 15px;
+  margin-right: auto;
+}
 
 #furnishingIO {
 	text-align: center;
-	background-color: #22FFFF;
+	background-color: #77FFFF;
+  margin: 15px;
+  margin-left: auto;
 }
 #furnishingsTable {
 	margin-bottom: 0px;
@@ -76,10 +85,22 @@
 input {
 	width: 50%;
 }
+input[type=file] {
+  width: 100%;
+}
 
 
 
-
+#pageTitle {
+  color: white;
+  text-align: center;
+  background: rgba(0,0,0,0.4);
+  border-radius: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  width: max-content;
+  padding: 5px 25px;
+}
 
 
 

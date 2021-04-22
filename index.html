@@ -4,71 +4,38 @@
 		<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
 		<title>ESO Furnishings Planner</title>
 		<link rel="stylesheet" type="text/css" href="furnishings.css">
-		<script type="text/javascript">
-		//$(function() {
-			/*
-
-			var translation = {};
-
-			$.getJSON('furnishings.json', function(data) {
-				translation = data
-				console.log(translation)
-			});
-			*/
-
-
-			/*
-			Object.keys(translation).forEach(function(k){
-				console.log(data[k])
-			});
-			*/
-
-
-		//});
-
-		</script>
 		<script type="text/javascript" src="fakeFurnishingsJSON.js"></script>
+		<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+		<meta content="utf-8" http-equiv="encoding">
 		<script type="text/javascript">
 
+			// 	      ##    ###    ##     ##    ###     ######   ######  ########  #### ########  ########
+			// 	      ##   ## ##   ##     ##   ## ##   ##    ## ##    ## ##     ##  ##  ##     ##    ##
+			// 	      ##  ##   ##  ##     ##  ##   ##  ##       ##       ##     ##  ##  ##     ##    ##
+			// 	      ## ##     ## ##     ## ##     ##  ######  ##       ########   ##  ########     ##
+			// 	##    ## #########  ##   ##  #########       ## ##       ##   ##    ##  ##           ##
+			// 	##    ## ##     ##   ## ##   ##     ## ##    ## ##    ## ##    ##   ##  ##           ##
+			// 	 ######  ##     ##    ###    ##     ##  ######   ######  ##     ## #### ##           ##
 
 			var furnishings = {}
-			/*
+			var prices = {}
+			var materials = {}
 
-			<tr>
-				<td>Test</td>
-				<td><input type="number"></td>
-				<td><button>-</button></td>
-			</tr>
 
-			<div class="row">
-				<div class="cell">Luke Peters</div>
-				<div class="cell">25</div>
-				<div class="cell">-</div>
-			</div>
 
-			*/
-						
 
+			//Add and remove furnishings
 
 			function addHandler() {
 				let name = this.text
 				if (name in furnishings) {
 					return
 				}
-				/*
-				let template = `<tr name="${name}"><td>${name}</td><td><input type="number" value=1 onChange='changeHandler(this)'></td><td><button onclick='removeHandler(this)'>-</button></td></tr>`
-				document.getElementById("furnishingBody").insertAdjacentHTML('beforeend',template)
-				*/
+
 				let template = `<div class="row" name="${name}"><div class="cell">${name}</div><div class="cell"><input type="number" value=1 onChange='changeHandler(this)'></div><div class="cell"><button onclick='removeHandler(this)'>-</button></div></div>`
 				document.getElementById("furnishingsTable").insertAdjacentHTML('beforeend',template)
 				toggleDropdown()
 				furnishings[name] = 1
-				/*
-				console.log(name)
-				console.log(translation[name])
-				console.log()
-				*/
-				//console.log(furnishings)
 				updateMats()
 			}
 
@@ -76,9 +43,12 @@
 				let element = ele.parentElement.parentElement;
 				delete furnishings[element.firstChild.innerText];
 				element.remove();
-				//console.log(furnishings);
 				updateMats()
 			}
+
+
+
+			//Change of input value handlers
 
 			function changeHandler(ele) {
 				let name = ele.parentElement.parentElement.firstChild.innerText;
@@ -89,26 +59,25 @@
 					amount = Number(amount)
 				}
 				furnishings[name] = amount;
-				//console.log(furnishings);
 				updateMats()
 			}
 
+			function priceChangeHandler(ele) {
+				let name = ele.parentElement.parentElement.firstChild.innerText;
+				prices[name.toLowerCase()] = ele.value
+				updatePrices()
+			}
 
-			/*
-			<div class="row">
-				<div class="cell" style="width: 70%">Name</div>
-				<div class="cell">Amount</div>
-				<div class="cell">Price</div>
-			</div>
-			*/
+
+
+
+			//Update Methods
 
 			function updateMats() {
-				let materials = {};
+				materials = {};
 				Object.keys(furnishings).forEach(function(name) {
 					let count = furnishings[name];
-					//console.log(`${name} - ${count}`);
 					let current = translation[name];
-					//console.log(current)
 					Object.keys(translation[name]).forEach(function(lmat) {
 						if (lmat in materials) {
 							materials[lmat] += count*current[lmat]
@@ -118,35 +87,43 @@
 					});
 				});
 
-
 				let materialString = '<div class="row header"><div class="cell" style="width: 70%">Name</div><div class="cell">Amount</div><div class="cell">Price</div></div>'
+				let price = 0
 				Object.keys(materials).forEach(function(name) {
-					materialString += `<div class="row"><div class="cell">${name}</div><div class="cell">${materials[name]}</div><div class="cell"><input type="number" value=0></div></div>`
+					if (name.toLowerCase() in prices) {
+						price = prices[name.toLowerCase()];
+					} else {
+						price = 0
+					}
+					materialString += `<div class="row"><div class="cell">${name}</div><div class="cell">${materials[name]}</div><div class="cell"><input type="number" value=${price} onChange='priceChangeHandler(this)'></div></div>`
 				});
-				/*
-				let materialString = ''
-				Object.keys(materials).forEach(function(name) {
-					materialString += `<li>${materials[name]}x ${name}</li>`
-				});
-				document.getElementById('materialsList').innerHTML = materialString
-				*/
-				document.getElementById('materialsOut').innerHTML = materialString
+				document.getElementById('materialsOut').innerHTML = materialString;
 
-				//console.log(materials)
+				updatePrices()
 				
 			}
 
-			$(function() {
-				//console.log(translation)
-				let dropdown = document.getElementById('dropdownScroll')
-				Object.keys(translation).forEach(function(k) {
-					let a = document.createElement('a')
-					a.className = "dropdownHover";
-					a.appendChild(document.createTextNode(k))
-					a.onclick = addHandler
-					dropdown.appendChild(a)
+			function updatePrices() {
+				let price = 0
+				let netPrice = 0
+
+				Object.keys(materials).forEach(function(name) {
+					if (name.toLowerCase() in prices) {
+						price = Number(prices[name.toLowerCase()]);
+					} else {
+						price = 0
+					}
+
+					netPrice += price*materials[name]
 				});
-			});
+				let x = document.getElementById('netPrice')
+				x.innerText = netPrice.toFixed(0)
+			}
+
+
+
+
+			//IO Functionality
 
 
 			//from codevoila
@@ -170,7 +147,6 @@
 				}
 				let fr = new FileReader();
 				fr.onload = function(e) { 
-					console.log(e);
 					furnishings = JSON.parse(e.target.result);
 					importHandler()
 				}
@@ -180,12 +156,45 @@
 			function importHandler() {
 				let innerHTML = '<div class="row header blue"><div class="cell" style="width: 70%">Name</div><div class="cell">Amount</div><div class="cell">Remove</div></div>'
 				Object.keys(furnishings).forEach(function(name) {
-					//innerHTML += `<tr name="${name}"><td>${name}</td><td><input type="number" value=${furnishings[name]} onChange='changeHandler(this)'></td><td><button onclick='removeHandler(this)'>-</button></td></tr>`
 					innerHTML += `<div class="row" name="${name}"><div class="cell">${name}</div><div class="cell"><input type="number" value=${furnishings[name]} onChange='changeHandler(this)'></div><div class="cell"><button onclick='removeHandler(this)'>-</button></div></div>`
 				})
 				document.getElementById("furnishingsTable").innerHTML = innerHTML
 				updateMats()
 			}
+
+
+			function pricesFromJSON() {
+				let files = document.getElementById('selectFilesPrices').files;
+				if (files.length <= 0) {
+					return false;
+				}
+				let fr = new FileReader();
+				fr.onload = function(e) { 
+					prices = JSON.parse(e.target.result);
+					updateMats()
+				}
+				fr.readAsText(files.item(0));
+			};
+
+
+
+
+			// Dropdown Functionallity
+
+
+			$(function() {
+				let dropdown = document.getElementById('dropdownScroll')
+				Object.keys(translation).forEach(function(k) {
+					let a = document.createElement('a')
+					a.className = "dropdownHover";
+					a.appendChild(document.createTextNode(k))
+					a.onclick = addHandler
+					dropdown.appendChild(a)
+				});
+			});
+
+
+
 
 
 		</script>
@@ -194,16 +203,24 @@
 	<body>
 
 
+
+
 		<!--
-			<table id="furnishingList">
-				<thead id="furnishingHead">
-					<th id="furnishingHeadName">Name</th>
-					<th>Amount</th>
-					<th>Remove</th>
-				</thead>
-				<tbody id="furnishingBody"></tbody>
-			</table>
+
+		
+			########   #######  ########  ##    ##
+			##     ## ##     ## ##     ##  ##  ##
+			##     ## ##     ## ##     ##   ####
+			########  ##     ## ##     ##    ##
+			##     ## ##     ## ##     ##    ##
+			##     ## ##     ## ##     ##    ##
+			########   #######  ########     ##
 		-->
+
+		<div id="pageTitle">
+			<h1>ESO Furnisher Planner</h1>
+		</div>
+
 		<div class="wrapper">
 			<div class="table" id="furnishingsTable">
 				<div class="row header blue">
@@ -232,12 +249,7 @@
 
 
 		<!-- Dropdown Code from W3 Schools -->
-<!--
-		<div id="materials">
-			<p>The materials required to make all the specified items are:</p>
-			<ul id="materialsList"></ul>
-		</div>
--->
+
 		<div class="wrapper">
 			<div class="table" style="margin: 0px">
 				<div class="row header blue">
@@ -253,6 +265,13 @@
 			</div>
 		</div>
 
+		<div class="wrapper">
+			<div class="table">
+				<div class="row header green">
+					<div class="cell">The total price for all the materials is: <span id="netPrice">0</span> gold</div>
+				</div>
+			</div>
+		</div>
 
 
 
@@ -261,17 +280,33 @@
 
 
 
-
-		<table id="furnishingIO">
-			<tbody>
-				<tr><td><button id="export" onclick="exportToJsonFile(furnishings)">Export</button></td></tr>
-				<tr><td><input type="file" id="selectFiles" value="Import" /></td></tr>
-				<tr><td><button id="import" onclick="importFromJSON()">Import</button></td></tr>
-			</tbody>
+		<div style="display: flex;">
+			<table id="furnishingIO">
+				<thead>
+					<th>Furnishing List Import/Export</th>
+				</thead>
+				<tbody>
+					<tr><td><button id="export" onclick="exportToJsonFile(furnishings)">Export</button></td></tr>
+					<tr><td><input type="file" id="selectFiles" value="Import" /></td></tr>
+					<tr><td><button id="import" onclick="importFromJSON()">Import</button></td></tr>
+				</tbody>
+			</table>
+			<table id="pricesIO">
+				<thead>
+					<th>Prices Import/Export</th>
+				</thead>
+				<tbody>
+					<tr><td><button id="exportPrices" onclick="exportToJsonFile(prices)">Export</button></td></tr>
+					<tr><td><input type="file" id="selectFilesPrices" value="Import" /></td></tr>
+					<tr><td><button id="importPrices" onclick="pricesFromJSON()">Import</button></td></tr>
+					<tr><td><a href='prices.json' download>Premade Price File</a><br>May be outdated</td></tr>
+				</tbody>
+			</table>
 		</div>
 
 
 		<script>
+			// Dropdown Menu from W3Schools
 			/* When the user clicks on the button,
 			toggle between hiding and showing the dropdown content */
 			function toggleDropdown() {

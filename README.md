@@ -1,4 +1,4 @@
-[Visit the webpage!](M0RGaming.github.io/ESOFurnishings)
+[Visit the webpage!](https://M0RGaming.github.io/ESOFurnishings)
 
 # How to use ttcParse.py:
 ttcParse.py provides a way to download pricing data from Tamriel Trade Center and use it to autofill most prices. Simply go to your TTC addon folder or download [this zip](https://us.tamrieltradecentre.com/download/PriceTable) and copy the `PriceTable.lua` and `ItemLookUpTable_EN.lua` into this directory. Run the `ttcParse.py` Python 3 file, and a `prices.json` file will be produced.

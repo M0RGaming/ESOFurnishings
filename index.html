@@ -21,6 +21,8 @@
 			var prices = {}
 			var materials = {}
 
+			var formatter = new Intl.NumberFormat()
+
 
 
 
@@ -117,7 +119,8 @@
 					netPrice += price*materials[name]
 				});
 				let x = document.getElementById('netPrice')
-				x.innerText = netPrice.toFixed(0)
+				//x.innerText = netPrice.toFixed(0)
+				x.innerText = formatter.format(Math.ceil(netPrice))
 			}
 
 
@@ -268,7 +271,7 @@
 		<div class="wrapper">
 			<div class="table">
 				<div class="row header green">
-					<div class="cell">The total price for all the materials is: <span id="netPrice">0</span> gold</div>
+					<div class="cell">The total price for all the materials is: <span id="netPrice">0</span> Gold</div>
 				</div>
 			</div>
 		</div>

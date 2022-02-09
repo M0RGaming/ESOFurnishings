@@ -1,6 +1,9 @@
 import re, json
 translation = {}
 
+# https://esoitem.uesp.net/dumpMinedItems.php?type=29&output=csv
+
+
 with open('Furnishings.csv') as fil:
 	data = fil.read()
 	'''
